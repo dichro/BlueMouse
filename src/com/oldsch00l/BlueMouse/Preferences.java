@@ -6,9 +6,14 @@ import java.util.Set;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
@@ -25,6 +30,7 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		addPreferencesFromResource(R.xml.preference);
 
 		mEditPrefUpdateInterval = (EditTextPreference)getPreferenceScreen().findPreference(KEY_UPDATE_INTERVAL);
+		doBindService();
 	}
 
 //	private String getStringResourceByName(String aString)
@@ -67,10 +73,54 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 	}
 
 	@Override
+	public void onDestroy() {
+		doUnbindService();
+		super.onDestroy();
+	}
+
+	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
 		if(key.equals(KEY_UPDATE_INTERVAL)) {
 			mEditPrefUpdateInterval.setSummary(sharedPreferences.getString(KEY_UPDATE_INTERVAL, "2000") + " ms");
+		}
+		if (key.equals(CONNECT_LIST) && mSerialService != null) {
+			mSerialService.connect(sharedPreferences.getString(CONNECT_LIST,
+					"disabled"));
+		}
+	}
+
+	private BlueMouseService mSerialService = null;
+	private boolean mIsBound;
+	private ServiceConnection mServiceCon = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			mSerialService = ((BlueMouseService.BluetoothSerialBinder) service)
+					.getService();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			mSerialService = null;
+		}
+	};
+
+	void doBindService() {
+		// Establish a connection with the service. We use an explicit
+		// class name because we want a specific service implementation that
+		// we know will be running in our own process (and thus won't be
+		// supporting component replacement by other applications).
+		bindService(new Intent(this, BlueMouseService.class), mServiceCon,
+				Context.BIND_AUTO_CREATE);
+		mIsBound = true;
+	}
+
+	void doUnbindService() {
+		if (mIsBound) {
+			// Detach our existing connection.
+			unbindService(mServiceCon);
+			stopService(new Intent(this, BlueMouseService.class));
+			mIsBound = false;
 		}
 	}
 }

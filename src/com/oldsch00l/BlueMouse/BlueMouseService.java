@@ -44,6 +44,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -234,8 +235,22 @@ public class BlueMouseService extends Service {
 	}
 
 	/**
+	 * Force a connection to this address.
+	 * 
+	 * @param bdAddr
+	 */
+	public void connect(String bdAddr) {
+		Set<BluetoothDevice> devs = mAdapter.getBondedDevices();
+		for (BluetoothDevice dev : devs) {
+			if (dev.getAddress().equals(bdAddr)) {
+				new ConnectingThread(dev).start();
+			}
+		}
+	}
+
+	/**
 	 * Write to the ConnectedThread in an unsynchronized manner
-	 *
+	 * 
 	 * @param out
 	 *            The bytes to write
 	 * @see ConnectedThread#write(byte[])
@@ -432,7 +447,7 @@ public class BlueMouseService extends Service {
 						mmSocket.close();
 					} catch (IOException e1) {
 						Log.e(TAG, "socket close failed", e1);
-					} finally{
+					} finally {
 						connectionLost(this);
 					}
 					break;
@@ -476,8 +491,27 @@ public class BlueMouseService extends Service {
 		}
 	}
 
-	private class NMEATask extends TimerTask {
+	private class ConnectingThread extends Thread {
+		private final BluetoothDevice dev;
 
+		ConnectingThread(BluetoothDevice dev) {
+			this.dev = dev;
+		}
+
+		@Override
+		public void run() {
+			try {
+				BluetoothSocket socket = dev
+						.createRfcommSocketToServiceRecord(UUID
+								.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+				socket.connect();
+				connected(socket, dev);
+			} catch (IOException e) {
+				Log.e(TAG, "force connect failed", e);
+			}
+		}
+	}
+	private class NMEATask extends TimerTask {
 		@Override
 		public void run() {
 			String sRMCMsg = null;
