@@ -562,7 +562,7 @@ public class BlueMouseService extends Service {
 					.isProviderEnabled(LocationManager.GPS_PROVIDER)
 					|| mCurGGAString == null) {
 				if (mCurLocation != null) {
-					sGGAMsg = NMEAHelper.getNMEAGGA(mCurLocation);
+					sGGAMsg = YaesuFormatter.getNMEAGGA(mCurLocation);
 				}
 			} else {
 				sGGAMsg = mCurGGAString;
@@ -641,7 +641,7 @@ public class BlueMouseService extends Service {
 				if (nmea.startsWith("$GPGGA")) {
 					if( lowerNmea.indexOf(",e,") > 0 || lowerNmea.indexOf(",w,") > 0 ) {
 //						Log.v(TAG, "NMEAListener: " + nmea.trim());
-						mCurGGAString = nmea;
+						// mCurGGAString = nmea;
 						return;
 					} else {
 						mCurGGAString = null;
