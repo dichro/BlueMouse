@@ -1,5 +1,11 @@
 package com.oldsch00l.BlueMouse;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
@@ -44,9 +50,20 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
+		BluetoothAdapter ba = BluetoothAdapter.getDefaultAdapter();
+		Set<BluetoothDevice> devices = ba.getBondedDevices();
+		int size = devices.size();
+		List<CharSequence> names = new ArrayList<CharSequence>(size);
+		List<CharSequence> values = new ArrayList<CharSequence>(size);
+		names.add("Disabled");
+		values.add("disabled");
+		for (BluetoothDevice dev : devices) {
+			names.add(dev.getName());
+			values.add(dev.getAddress());
+		}
 		ListPreference connections = (ListPreference)getPreferenceScreen().findPreference(CONNECT_LIST);
-		connections.setEntries(new CharSequence[]{"foo"});
-		connections.setEntryValues(new CharSequence[]{"foo"});
+		connections.setEntries(names.toArray(new CharSequence[size]));
+		connections.setEntryValues(values.toArray(new CharSequence[size]));
 	}
 
 	@Override

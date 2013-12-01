@@ -4,6 +4,6 @@
     
     <ListPreference android:key="portnumber" android:dialogTitle="serial port number" android:title="Serial port number" android:entryValues="@array/serialports" android:entries="@array/serialports" android:dependency="forcechannel" android:defaultValue="1"/>
     <EditTextPreference android:title="@string/update_interval" android:key="update_interval" android:enabled="true" android:inputType="number" android:dialogTitle="@string/update_interval_title" android:defaultValue="2000"/>
-    <ListPreference android:dialogTitle="Force Connection" android:title="ForceConnection" android:key="force_connection"/>    
+    <ListPreference android:dialogTitle="Force Connection" android:title="Force Connection" android:key="force_connection"/>    
 
 </PreferenceScreen>
