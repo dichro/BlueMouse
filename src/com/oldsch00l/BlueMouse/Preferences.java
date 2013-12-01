@@ -4,10 +4,12 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
 
 public class Preferences extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String KEY_UPDATE_INTERVAL = "update_interval";
+	public static final String CONNECT_LIST = "force_connection";
 
 	private EditTextPreference mEditPrefUpdateInterval;
 
@@ -41,6 +43,10 @@ public class Preferences extends PreferenceActivity implements OnSharedPreferenc
 		mEditPrefUpdateInterval.setSummary(sp.getString(KEY_UPDATE_INTERVAL, "2000") + " ms");
 
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+
+		ListPreference connections = (ListPreference)getPreferenceScreen().findPreference(CONNECT_LIST);
+		connections.setEntries(new CharSequence[]{"foo"});
+		connections.setEntryValues(new CharSequence[]{"foo"});
 	}
 
 	@Override
